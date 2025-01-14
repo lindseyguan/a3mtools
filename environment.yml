@@ -1,0 +1,13 @@
+name: a3mtools
+channels:
+  - conda-forge
+dependencies:
+  - python>=3.10
+  - pip
+  - numpy<2
+  - biopython>=1.80
+  - importlib-resources
+  - pip:
+    - python-dotenv
+    - mkdocs
+    - -e .
