@@ -1,0 +1,17 @@
+#9,17	1,1
+>101	102
+ABCDEFGHIJKLMNOPQRSTUVW
+>101
+ABCDEFGHI--------------
+>ortho1
+xxABCDxxEFGZZ--------------
+>ortho2
+A--DxxE-GHIxxxx--------------
+>ortho3
+----xxEFGH---------------
+>102
+---------JKLMNOPQRSTUVW
+>ortho1
+---------JKLMNOPQRSTUVWxxxxxx
+>ortho2
+---------------PQRSTUVW

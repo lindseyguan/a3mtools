@@ -128,6 +128,16 @@ class MSAa3m:
             raise NotImplementedError(
                 "Cannot slice alignment with multiple query sequences yet"
             )
+        # handle cases where the start/end are none (i.e. [:-1] or [1:])
+        if start is None:
+            start = 0
+        if end is None:
+            end = len(self.query)
+        # handle negative indices
+        if start < 0:
+            start = len(self.query) + start
+        if end < 0:
+            end = len(self.query) + end
         sliced_query = ProteinSequence(self.query.header, self.query.seq_str[start:end])
         new_info_line = f"#{len(sliced_query.seq_str)}\t{self.query_seq_cardinality[0]}"
         sliced_sequences = []
@@ -154,6 +164,9 @@ class MSAa3m:
     def __getitem__(self, index):
         """This should allow for slicing of the sequence"""
         if isinstance(index, slice):
+            # raise error if the slice is not a step of 1
+            if index.step is not None and index.step != 1:
+                raise NotImplementedError("Slicing with a step other than 1 is not supported")
             return self._slice_alignment(index.start, index.stop)
         elif isinstance(index, int):
             return self._slice_alignment(index, index + 1)
@@ -202,7 +215,7 @@ class MSAa3m:
             # if the MSA was not previously concatenated
             return MSAa3m(new_info_line, new_query, new_sequences)
         else:
-            raise TypeError(f"Cannot concatenate A3M_MSA with {type(other)}")
+            raise TypeError(f"Cannot concatenate MSAa3m with {type(other)}")
 
     def save(self, filepath):
         with open(filepath, "w") as f:
