@@ -10,6 +10,8 @@ Tools for working with a3m files. Designed to help generate input for structure 
 
 <!-- Provides a method to easily slice a3m MSAs while preserving insertions. <br>Also allows you to concatenate MSAs into a single a3m file for complex prediction. -->
 
+If you have any questions, find any issues/bugs, or have suggestions, please open an issue on the github page. <br>
+
 ## Installation
 ```bash
 pip install a3mtools
@@ -65,12 +67,12 @@ There will eventually be a more complete guide. But for now, you can install the
 
 ```python
 import a3mtools
-import a3mtools.examples as examples
+import a3mtools.examples as examples # examples that come installed with a3mtools
 ```
 
 ### import an a3m file
 ```python
-msa = a3mtools.MSAa3m.from_a3m_file(examples.example_a3m_file1)
+msa = a3mtools.MSAa3m.from_a3m_file(examples.a3m_file1)
 print(msa)
 ```
 
@@ -85,7 +87,7 @@ A--DxxE-GHIxxxx
 >ortho3
 ----xxEFGH-
 ```
-The input to the `a3mtools.MSAa3m.from_a3m_file` function is the path to any a3m file.
+The input to the `a3mtools.MSAa3m.from_a3m_file` function is the path to an a3m file.
 
 ### slicing the alignment
 ```python
@@ -105,7 +107,7 @@ CDxxE
 
 ### concatenating alignments
 ```python
-msa2 = a3mtools.MSAa3m.from_a3m_file(examples.example_a3m_file2)
+msa2 = a3mtools.MSAa3m.from_a3m_file(examples.a3m_file2)
 print(msa2)
 ```
 ```
@@ -180,8 +182,8 @@ complex_msa.save("example_complex.a3m")
 
 ## important notes
 - slice numbering is relative to the **query sequence**
-- query sequence is always the first sequence in the MSA, and is named 101 or some combination of concatenated querys (e.g. 101\t102)
-- slicing with a step size other than 1 is not supported yet and probably won't be
+- query sequence is always the first sequence in the MSA, and is named 101 or some combination of concatenated querys if the MSA is the result of concatenation (e.g. 101\t102)
+- slicing with a step size other than 1 is not supported yet and probably will not be supported
 - **MSAs are combined in unpaired format**
   - combining MSAs in paired format is not supported yet
 

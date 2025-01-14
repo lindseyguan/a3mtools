@@ -14,14 +14,14 @@ def test_a3mtools_imported():
     assert "a3mtools" in sys.modules
 
 # # import an a3m file
-# msa = a3mtools.MSAa3m.from_a3m_file(examples.example_a3m_file1)
+# msa = a3mtools.MSAa3m.from_a3m_file(examples.a3m_file1)
 # print(msa)
 
 # # slicing the alignment
 # print(msa[2:5])
 
 # # concatenating alignments
-# msa2 = a3mtools.MSAa3m.from_a3m_file(examples.example_a3m_file2)
+# msa2 = a3mtools.MSAa3m.from_a3m_file(examples.a3m_file2)
 # print(msa2)
 # print(msa + msa2)
 # print(msa + msa2 + msa)
