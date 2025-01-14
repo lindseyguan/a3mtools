@@ -4,7 +4,7 @@ build-backend = "flit_core.buildapi"
 
 [project]
 name = "a3mtools"
-version = "0.1.0a1"
+version = "0.1.0a3"
 description = "tools for working with a3m files for structure prediction"
 authors = [
   { name = "Jackson Halpin" },
