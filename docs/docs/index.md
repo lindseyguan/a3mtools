@@ -2,7 +2,7 @@
 
 ## Description
 
-a motif discovery algorithm that uses LLM embeddings
+
 
 ## Commands
 
