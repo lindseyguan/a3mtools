@@ -16,6 +16,12 @@ classifiers = [
     "License :: OSI Approved :: MIT License"
 ]
 requires-python = "~=3.10"
+dependencies = [
+    "importlib-resources",
+    "numpy<2",
+    # "biopython >= 1.8",
+]
+
 
 [tool.flit.sdist]
 include = [
