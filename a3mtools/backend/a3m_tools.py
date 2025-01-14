@@ -106,6 +106,18 @@ class MSAa3m:
 
     @classmethod
     def from_a3m_file(cls, file_path: Path | str):
+        """Create an MSAa3m object from an a3m file
+
+        Parameters
+        ----------
+        file_path : Path | str
+            path to the a3m file
+
+        Returns
+        -------
+        MSAa3m
+            a a3mtools.MSAa3m object
+        """        
         info_line, query, sequences = import_a3m(file_path)
         return cls(info_line, query, sequences)
 

@@ -1,13 +1,25 @@
 # a3mtools
 
-Tools for working with a3m files. Designed for generating input to structure prediction tools like alphafold.
+Tools for working with a3m files. Designed to help generate input for structure prediction tools like alphafold. 
+
+**Main features:**
+- import a3m files from MMseqs2 search results into python objects
+- Easily slice MSAs while preserving insertions
+- Combine multiple MSAs into a single a3m file for complex prediction
+- Save manipulated MSAs to new a3m files
+
+<!-- Provides a method to easily slice a3m MSAs while preserving insertions. <br>Also allows you to concatenate MSAs into a single a3m file for complex prediction. -->
 
 ## Installation
+```bash
+pip install a3mtools
+```
 
+or if you want an editable version:
 ```bash
 git clone https://github.com/jacksonh1/a3mtools.git
 cd a3mtools
-pip install .
+pip install -e .
 ```
 
 ## What these tools do:
@@ -50,19 +62,6 @@ When slicing or combining MSAs, insertions are maintained (see output of example
 ## Usage
 There will eventually be a more complete guide. But for now, you can install the package and run the following code to see some of the basic functionality. <br>
 
-<style>
-    .output-block {
-        background-color: #f0f0f0;
-        border-left: 3px solid #2980b9;
-        padding: 10px;
-        margin-left: 20px;
-        font-family: monospace;
-        font-size: 11px;
-        white-space: pre;
-    }
-</style>
-
-
 
 ```python
 import a3mtools
@@ -75,7 +74,8 @@ msa = a3mtools.MSAa3m.from_a3m_file(examples.example_a3m_file1)
 print(msa)
 ```
 
-<div class="output-block">#9	1
+```
+#9	1
 >101
 ABCDEFGHI
 >ortho1
@@ -84,13 +84,15 @@ xxABCDxxEFGZZ
 A--DxxE-GHIxxxx
 >ortho3
 ----xxEFGH-
-</div>
+```
+The input to the `a3mtools.MSAa3m.from_a3m_file` function is the path to any a3m file.
 
 ### slicing the alignment
 ```python
 print(msa[2:5])
 ```
-<div class="output-block">#3	1
+```
+#3	1
 >101
 CDE
 >ortho1
@@ -99,27 +101,29 @@ CDxxE
 -DxxE
 >ortho3
 --xxE
-</div>
+```
 
 ### concatenating alignments
 ```python
 msa2 = a3mtools.MSAa3m.from_a3m_file(examples.example_a3m_file2)
 print(msa2)
 ```
-<div class="output-block">#17	1
+```
+#17	1
 >101
 JKLMNOPQRSTUVW
 >ortho1
 JKLMNOPQRSTUVWxxxxxx
 >ortho2
 ------PQRSTUVW
-</div>
+```
 <br>
 
 ```python
 print(msa + msa2)
 ```
-<div class="output-block">#9,17	1,1
+```
+#9,17	1,1
 >101	102
 ABCDEFGHIJKLMNOPQRSTUVW
 >101
@@ -136,13 +140,14 @@ A--DxxE-GHIxxxx--------------
 ---------JKLMNOPQRSTUVWxxxxxx
 >ortho2
 ---------------PQRSTUVW
-</div>
+```
 <br>
 
 ```python
 print(msa + msa2[2:5] + msa[5:])
 ```
-<div class="output-block">#9,3,4	1,1,1
+```
+#9,3,4	1,1,1
 >101	102	103
 ABCDEFGHILMNFGHI
 >101
@@ -165,7 +170,7 @@ A--DxxE-GHIxxxx-------
 -------------GHI
 >ortho3
 ------------FGH-
-</div>
+```
 
 ### saving the alignment to a file
 ```python
@@ -173,9 +178,12 @@ complex_msa = msa + msa2
 complex_msa.save("example_complex.a3m")
 ```
 
-### important notes
+## important notes
+- slice numbering is relative to the **query sequence**
+- query sequence is always the first sequence in the MSA, and is named 101 or some combination of concatenated querys (e.g. 101\t102)
 - slicing with a step size other than 1 is not supported yet and probably won't be
-- combining MSAs in paired format is not supported yet
+- **MSAs are combined in unpaired format**
+  - combining MSAs in paired format is not supported yet
 
 
 ## future features:
