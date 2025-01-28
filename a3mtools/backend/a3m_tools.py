@@ -1,5 +1,6 @@
 from pathlib import Path
-
+import re
+import string
 
 class ProteinSequence:
     def __init__(self, header: str, sequence: str):
@@ -74,6 +75,52 @@ def parse_info_line(info_line: str):
     query_seq_lengths = info[0][1:].split(",")
     query_seq_cardinality = info[1].split(",")
     return query_seq_lengths, query_seq_cardinality
+
+
+def diagonal_concat(msa_1, msa_2):
+    """
+    Concatenates two MSAs in the unpaired format
+    """
+    new_msa_1 = MSAa3m(info_line=msa_1.info_line,
+                       query=msa_1.query,
+                       sequences=[]
+                      )
+    new_msa_2 = MSAa3m(info_line=msa_2.info_line,
+                       query=msa_2.query,
+                       sequences=[]
+                      )
+
+    msa_1_no_gaps = []
+    for seq in msa_1.sequences:
+        if seq.seq_str == len(seq.seq_str) * '-':
+            continue
+        elif re.search("^10[1-9]$", seq.header): # query, again
+            continue
+        else:
+            msa_1_no_gaps.append(seq)
+    new_msa_1.sequences = msa_1_no_gaps
+
+    msa_2_no_gaps = []
+    for seq in msa_2.sequences:
+        if seq.seq_str == len(seq.seq_str) * '-':
+            continue
+        elif re.search("^10[1-9]$", seq.header): # query, again
+            continue
+        else:
+            msa_2_no_gaps.append(seq)
+    new_msa_2.sequences = msa_2_no_gaps
+
+    # Make msa_1 gap sequences
+    for seq in new_msa_2.sequences:
+        gap_seq = ProteinSequence(seq.header, '-'*len(new_msa_1.query.seq_str))
+        new_msa_1.sequences.append(gap_seq)
+
+    # Make msa_2 gap sequences
+    for seq in reversed(new_msa_1.sequences):
+        gap_seq = ProteinSequence(seq.header, '-'*len(new_msa_2.query.seq_str))
+        new_msa_2.sequences.insert(0, gap_seq)
+
+    return new_msa_1 + new_msa_2
 
 
 class MSAa3m:
@@ -228,7 +275,90 @@ class MSAa3m:
             return MSAa3m(new_info_line, new_query, new_sequences)
         else:
             raise TypeError(f"Cannot concatenate MSAa3m with {type(other)}")
-
+    
     def save(self, filepath):
         with open(filepath, "w") as f:
             f.write(str(self))
+
+
+class PairedMSAa3m(MSAa3m):
+    def __init__(self, 
+                 info_line: str, 
+                 query: ProteinSequence, 
+                 sequences: list[ProteinSequence],
+                 paired: bool = False
+                ):
+        super().__init__(info_line, query, sequences)
+
+        self.query_sequences = []
+        self.query_idxs = []
+        self.paired = paired
+
+        for _, i in zip(string.ascii_uppercase, range(len(self.query_seq_lengths))):
+            if i == 0:
+                end = int(self.query_seq_lengths[i])
+                seq = self.query.seq_str[:end]
+                self.query_idxs.append((0, end))
+            else:
+                start = int(self.query_seq_lengths[i-1])
+                end = start + int(self.query_seq_lengths[i])
+                seq = self.query.seq_str[start:end]
+                self.query_idxs.append((start, end))
+            self.query_sequences.append(ProteinSequence(f'10{i+1}', seq))
+
+    
+    def __str__(self):
+        if self.paired:
+            msa_str = f"{self.info_line}\n{self.query}\n{self.query}\n"
+        else:
+            msa_str = f"{self.info_line}\n{self.query}\n"
+        # Write paired region
+        for seq in self.sequences:
+            msa_str += f"{seq}\n"
+
+        if self.paired:
+            # Write unpaired region
+            for i, query_seq in enumerate(self.query_sequences):
+                msa_str += f'>{query_seq.header}\n'
+                pre_padding = ''
+                for j in range(0, i):
+                    pre_padding += '-'*self.query_seq_lengths[j]
+                post_padding = ''
+                for j in range(i+1, len(self.query_sequences)):
+                    post_padding += '-'*self.query_seq_lengths[j]
+                query_seq_msa_row = f"{pre_padding}{query_seq.seq_str}{post_padding}"
+                assert len(query_seq_msa_row) == len(self.query.seq_str)
+                msa_str += f'{query_seq_msa_row}\n'
+        return msa_str
+
+
+    def _slice_alignment(self, start, end):
+        sliced_query = ProteinSequence('101', self.query.seq_str[start:end])
+        new_info_line = f"#{len(sliced_query.seq_str)}\t{self.query_seq_cardinality[0]}"
+        sliced_sequences = []
+        for seq in self.sequences:
+            core_index = 0
+            sliced_seq = ""
+            for char in seq.seq_str:
+                if core_index >= end:
+                    break
+                if char.isupper():
+                    if core_index >= start:
+                        sliced_seq += char
+                    core_index += 1
+                elif char.islower():
+                    if core_index > start:
+                        sliced_seq += char
+                elif char == "-":
+                    if core_index >= start:
+                        sliced_seq += char
+                    core_index += 1
+            sliced_sequences.append(ProteinSequence(seq.header, sliced_seq))
+        return MSAa3m(new_info_line, sliced_query, sliced_sequences)
+
+
+    def get_msa_by_chain(self, chain_idx: int):
+        """
+        Returns the MSA associated with the chain index (int)
+        """
+        return self._slice_alignment(*self.query_idxs[chain_idx])
