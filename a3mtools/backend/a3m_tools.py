@@ -272,7 +272,7 @@ class MSAa3m:
                     new_sequences.append(new_seq)
             # add the original 2 queries back to the MSA but only
             # if the MSA was not previously concatenated
-            return MSAa3m(new_info_line, new_query, new_sequences)
+            return PairedMSAa3m(new_info_line, new_query, new_sequences)
         else:
             raise TypeError(f"Cannot concatenate MSAa3m with {type(other)}")
     
